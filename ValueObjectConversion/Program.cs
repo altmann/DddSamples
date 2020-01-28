@@ -77,8 +77,8 @@ namespace ValueObjectConversion
             OptionalStringVO optionalStringVO = null;
             OptionalStringVO optionalStringVO2 = new OptionalStringVO();
 
-            string optionalStringVOString = optionalStringVO; //.GetValueOrDefault();
-            string optionalStringVOString2 = optionalStringVO2; //.GetValueOrDefault();
+            string optionalStringVOString = optionalStringVO; //.GetValueOrNull();
+            string optionalStringVOString2 = optionalStringVO2; //.GetValueOrNull();
         }
 
         private static void OptionalDecimalValueObject()
@@ -86,15 +86,36 @@ namespace ValueObjectConversion
             OptionalDecimalVO optionalDecimalVO = null;
             OptionalDecimalVO optionalDecimalVO2 = new OptionalDecimalVO();
 
-            decimal optionalDecimalVODecimal = optionalDecimalVO; //.GetValueOrDefault();
-            decimal optionalDecimalVODecimal2 = optionalDecimalVO2; //.GetValueOrDefault();
+            decimal optionalDecimalVODecimal = optionalDecimalVO; //.GetValueOrThrow();
+            decimal optionalDecimalVODecimal2 = optionalDecimalVO2; //.GetValueOrThrow();
 
             decimal? nullOptionalDecimalVODecimal = optionalDecimalVO; //.GetValueOrNull();
             decimal? nullOptionalDecimalVODecimal2 = optionalDecimalVO2; //.GetValueOrNull();
 
-            // context depented if required
-            decimal requiredDecimalVODecimal = optionalDecimalVO.GetValueOrThrow();
+            // context dependent if required
+            decimal requiredDecimalVODecimal = optionalDecimalVO; //.GetValueOrThrow();
+            decimal? nullOptionalDecimalVODecimal3 = optionalDecimalVO; //.GetValueOrNull();
         }
+
+        // Lösung 1 - Simple Umsetzung
+        // Es wird bei der Casting Logik nicht nach Optional/Required unterschieden.
+        // Die Casting Logik beinhaltet immer die Optional VO Logik
+        //   - Bei string VO auf string: GetValueOrNull()
+        //   - Bei struct VO auf struct: GetValueOrThrow()
+        //   - Bei struct VO auf nullable struct: GetValueOrNull()
+        // VT: Einheitliche Logik
+        // NT: struct VO is required. 
+        //     Bei Konvertierung von required struct VO auf nullable struct"
+        //     wird keine Exception geworfen, da die Logik GetValueOrNull() ist.
+        //     In diesem Fall wäre besser GetValueOrThrow(). siehe Zeile 97. 
+
+        // Lösung 2 - Komplexere Umsetzung
+        // Es wird bei der Casting Logik nach Optional/Required unterschieden. 
+        //   - Bei Optional VO oben umgesetzte Casting Logik
+        //   - Bei Required VO oben umgesetzte Casting Logik
+        // VT: Nachteil von Lösung 1 ist behoben. 
+        // NT: Wird das VO geshared (ein mal optional, ein mal required), dann muss das VO
+        //     nur mit der Optional Cast Logik umgesetzt werden. 
     }
 
     public static class ObjectExtensions
